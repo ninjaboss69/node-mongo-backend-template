@@ -39,3 +39,21 @@ exports.create_administrators = async (req, res) => {
     res.status(500).send({ message: "Something went wrong" });
   }
 };
+
+exports.update_administrators = async (req, res) => {
+  try {
+    const existingAdmin = await AdministratorSchema.findById(
+      req.body._id
+    ).lean();
+
+    if (!existingAdmin) {
+      return res.status(409).send({ message: "Cannot find user to update" });
+    }
+
+    console.log(existingAdmin);
+    res.status(200).send({ message: "Successfully Updated Admin" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ message: "Something went wrong" });
+  }
+};
