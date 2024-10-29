@@ -83,18 +83,26 @@ AdminstratorSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
-AdminstratorSchema.methods.getTokens = function (user) {
-  const accessToken = jwt.sign({ user }, config.accessjwtsecret, {
-    expiresIn: config.accessjwtexpire,
-  });
+AdminstratorSchema.methods.getTokens = function () {
+  const accessToken = jwt.sign(
+    {
+      fullname: this.fullname,
+      permissions: this.permissions,
+      username: this.username,
+    },
+    config.accessjwtsecret,
+    {
+      expiresIn: config.accessjwtexpire,
+    }
+  );
 
-  delete user["fullname"];
-  delete user["role"];
-  delete user["permissions"];
-
-  const refreshToken = jwt.sign({ user }, config.refreshjwtsecret, {
-    expiresIn: config.refreshjwtexpire,
-  });
+  const refreshToken = jwt.sign(
+    { username: this.username },
+    config.refreshjwtsecret,
+    {
+      expiresIn: config.refreshjwtexpire,
+    }
+  );
 
   return { accessToken, refreshToken };
 };

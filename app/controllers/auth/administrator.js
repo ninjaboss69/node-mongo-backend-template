@@ -50,6 +50,7 @@ exports.update_administrators = async (req, res) => {
     if (fullname) updateObject.fullname = fullname;
     if (email) updateObject.email = email;
     if (permissions) updateObject.permissions = permissions;
+    if (password) updateObject.password = password;
 
     const existingAdmin = await AdministratorSchema.findById(_id).lean();
 
