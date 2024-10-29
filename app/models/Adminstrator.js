@@ -107,4 +107,20 @@ AdminstratorSchema.methods.getTokens = function () {
   return { accessToken, refreshToken };
 };
 
+AdminstratorSchema.methods.renewAccessToken = function () {
+  const accessToken = jwt.sign(
+    {
+      fullname: this.fullname,
+      permissions: this.permissions,
+      username: this.username,
+    },
+    config.accessjwtsecret,
+    {
+      expiresIn: config.accessjwtexpire,
+    }
+  );
+
+  return { accessToken };
+};
+
 module.exports = mongoose.model("administrators", AdminstratorSchema);

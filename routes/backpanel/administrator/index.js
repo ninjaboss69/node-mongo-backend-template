@@ -5,7 +5,10 @@ const {
   create_administrators,
   update_administrators,
 } = require("../../../app/controllers/auth/administrator");
-const { login_administrator } = require("../../../app/controllers/auth/auth");
+const {
+  login_administrator,
+  swap_token,
+} = require("../../../app/controllers/auth/auth");
 
 router.post(
   "/create-admin",
@@ -24,5 +27,7 @@ router.post(
   validater.validate_login_administrator,
   login_administrator
 );
+
+router.get("/swap-token", swap_token);
 
 module.exports = router;
