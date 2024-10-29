@@ -42,16 +42,49 @@ exports.create_administrators = async (req, res) => {
 
 exports.update_administrators = async (req, res) => {
   try {
-    const existingAdmin = await AdministratorSchema.findById(
-      req.body._id
-    ).lean();
+    const { _id, username, fullname, password, email, permissions } = req.body;
+
+    const updateObject = {};
+
+    if (username) updateObject.username = username;
+    if (fullname) updateObject.fullname = fullname;
+    if (email) updateObject.email = email;
+    if (permissions) updateObject.permissions = permissions;
+
+    const existingAdmin = await AdministratorSchema.findById(_id).lean();
 
     if (!existingAdmin) {
       return res.status(409).send({ message: "Cannot find user to update" });
     }
 
-    console.log(existingAdmin);
-    res.status(200).send({ message: "Successfully Updated Admin" });
+    const sameUsernames = await AdministratorSchema.find({ username }).lean();
+
+    // have to check if length >2 to ensure database is not corrupted by someone who has access to database
+
+    if (
+      (sameUsernames.length >= 1 && sameUsernames[0]._id.toString() !== _id) ||
+      sameUsernames.length >= 2
+    ) {
+      return res.status(409).send({ message: "Username already Occupied" });
+    }
+
+    const updateAdministratorsResponse = await AdministratorSchema.updateOne(
+      { _id },
+      { $set: updateObject }
+    );
+
+    if (
+      updateAdministratorsResponse.modifiedCount === 1 ||
+      updateAdministratorsResponse.matchedCount === 1
+    ) {
+      return res.status(200).send({
+        message: "Successfully Updated Admin",
+      });
+    } else {
+      return res.status(404).send({
+        message: "Something went wrong",
+      });
+    }
   } catch (err) {
     console.log(err);
     res.status(500).send({ message: "Something went wrong" });
