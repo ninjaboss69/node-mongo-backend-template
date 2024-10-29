@@ -8,6 +8,7 @@ exports.PERMISSIONS_LIST = {
   about_us: "about-us",
   tandc: "terms-conditions",
   pvpc: "privacy-policy",
+  superadmin: "superadmin",
 };
 
 exports.PERMISSIONS_LIST_BY_PAGE = [
@@ -20,4 +21,5 @@ exports.PERMISSIONS_LIST_BY_PAGE = [
   "about-us",
   "terms-conditions",
   "privacy-policy",
+  "superadmin",
 ];

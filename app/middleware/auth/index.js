@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../../config/config");
+const { PERMISSIONS_LIST } = require("../../constants/permissions");
 
 exports.check_permissions = function (req, res, next, page = "error") {
   if (!req.headers.secret_key) {
@@ -13,11 +14,15 @@ exports.check_permissions = function (req, res, next, page = "error") {
     if (!payload)
       return res.status(401).send({ message: "Unauthorized Request" });
 
-    if (!payload.permissions?.includes(page))
+    if (
+      !payload.permissions?.includes(page) &&
+      !payload.permissions.includes(PERMISSIONS_LIST.superadmin)
+    )
       return res
         .status(401)
         .send({ message: "You are not allowed to call this api" });
 
+    // permission passed
     next();
   } catch (error) {
     var errorCode = "Something went wrong";
