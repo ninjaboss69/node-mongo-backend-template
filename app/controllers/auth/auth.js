@@ -20,7 +20,18 @@ exports.login_administrator = async (req, res, next) => {
     if (isValidPassword) {
       const tokens = administrator.getTokens();
 
-      res.status(200).send({ message: "Sucessfully Login", tokens });
+      // set secure to true in production environment
+
+      res.cookie("Bearer", tokens.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24,
+      });
+      res.status(200);
+      res.send({
+        message: "Successfully Login",
+        accessToken: tokens.accessToken,
+      });
     } else {
       res.status(401).send({ message: "Unauthorized Login" });
     }
@@ -33,11 +44,11 @@ exports.login_administrator = async (req, res, next) => {
 exports.swap_token = async (req, res) => {
   // if the status code is not 200, frontend must logout immediately
   try {
-    if (!req.headers.secret_key) {
-      return res.status(401).send({ message: "Secret Key is missing" });
+    if (!req.cookies.Bearer || !req.cookies.Bearer) {
+      return res.status(401).send({ message: "Required Cookie Not Found" });
     }
 
-    const secret_key = req.headers.secret_key;
+    const secret_key = req.cookies.Bearer;
 
     const payload = jwt.verify(secret_key, config.refreshjwtsecret);
 
@@ -52,7 +63,6 @@ exports.swap_token = async (req, res) => {
           .send({ message: "Refresh Token Secret is Being Exposed!!!!" });
         // Immediately Alert Software Team
       }
-      // generate access token here
 
       const { accessToken } = administrator.renewAccessToken();
 
@@ -62,6 +72,9 @@ exports.swap_token = async (req, res) => {
       });
     } else return res.status(401).send({ message: "Unauthoirzed Request" });
   } catch (error) {
+    // Not Reaching to status 500 since we used default
+    // Later Fix this code
+
     let errorCode = "";
     switch (error?.message) {
       case "jwt malformed":
@@ -74,7 +87,20 @@ exports.swap_token = async (req, res) => {
         errorCode = "cannot verify integrity";
         break;
     }
-    if (errorCode !== "") return res.status(401).send({ message: errorCode });
-    return res.status(500).send({ message: "Something went wrong" });
+    // if something wrong with refresh token
+    // we better delete this token to protect futhur suspicious activity
+    // or to logout simply
+    res.clearCookie("Bearer");
+    return res.status(401).send({ message: errorCode });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    res.clearCookie("Bearer", { path: "/" });
+    res.send({ message: "Successfully Logout" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Something went wrong");
   }
 };

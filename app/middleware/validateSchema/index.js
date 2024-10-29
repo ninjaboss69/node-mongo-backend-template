@@ -8,8 +8,7 @@ function validate_create_administrator(req, res, next) {
   try {
     const payload = req.body;
 
-    const schema = CreateAdministratorValidator;
-    const { error } = schema.validate(payload);
+    const { error } = CreateAdministratorValidator.validate(payload);
 
     if (error) {
       return res.status(412).send({ message: error.details[0].message });
@@ -24,8 +23,8 @@ function validate_create_administrator(req, res, next) {
 function validate_update_administrator(req, res, next) {
   try {
     const payload = req.body;
-    const schema = UpdateAdminstratorValidator;
-    const { error } = schema.validate(payload);
+
+    const { error } = UpdateAdminstratorValidator.validate(payload);
 
     if (error) {
       return res.status(412).send({ message: error.details[0].message });
@@ -39,9 +38,8 @@ function validate_update_administrator(req, res, next) {
 function validate_login_administrator(req, res, next) {
   try {
     const payload = req.body;
-    const schema = LoginAdministratorValidator;
 
-    const { error } = schema.validate(payload);
+    const { error } = LoginAdministratorValidator.validate(payload);
     if (error) {
       return res.status(412).send({ message: error.details[0].message });
     }
